@@ -2,7 +2,9 @@
 using System.IO;
 using System.Net;
 using System.Net.Mail;
+using System.Net.WebSockets;
 using System.Security.Policy;
+using System.Text;
 using System.Text.RegularExpressions;
 
 internal class Program
@@ -32,7 +34,6 @@ internal class Program
             Console.WriteLine("Выберите действие:");
             Console.WriteLine("1. Выполнить вход в банк.");
             Console.WriteLine("2. Выход из программы.");
-
             userInput = Console.ReadLine();
 
             switch (userInput)
@@ -49,6 +50,8 @@ internal class Program
             }
         }
     }
+
+
     class User
     {
         private int _id;
@@ -93,7 +96,7 @@ internal class Program
 
                 foreach (User user in users)
                 {
-                    if (user._login == login && user._password == password)
+                    if (user._login == login && user._password == EncryptPasswordBase64(password))
                     {
                         userAuth._id = user._id;
                         isEnter = true;
@@ -342,6 +345,28 @@ internal class Program
 
                 await Task.Delay(86400000);
             }
+        }
+
+        /// <summary>
+        /// Функция шифрует пароль пользователя
+        /// </summary>
+        /// <param name="password">Пароль пользователя</param>
+        /// <returns></returns>
+        private static string EncryptPasswordBase64(string password)
+        {
+            var textBytes = System.Text.Encoding.UTF8.GetBytes(password);
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(password));
+        }
+
+        /// <summary>
+        /// Функция дешифрует пароль пользователя
+        /// </summary>
+        /// <param name="base64EncodedData">Зашифрованный пароль пользователя</param>
+        /// <returns></returns>
+        private static string DecryptPasswordBase64(string base64EncodedData)
+        {
+            var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
+            return Encoding.UTF8.GetString(base64EncodedBytes);
         }
     }
 }
